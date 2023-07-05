@@ -37,9 +37,6 @@ struct MemoryGame<CardContent> where CardContent: Equatable {
                     }
                     
                 } else {
-                    if cards[potentialMatchIndex].isAlreadySeen && cards[potentialMatchIndex].click > 0 {
-                        score -= 1
-                    }
                     if cards[chosenIndex].isAlreadySeen && cards[chosenIndex].click > 0 {
                         score -= 1
                     }
