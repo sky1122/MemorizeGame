@@ -9,7 +9,7 @@ import SwiftUI
 
 
 class EmojiMemoryGame: ObservableObject {
-//    static let emojis = ["🚗", "🚕", "🚙", "🚌", "🚎", "🏎️", "🚓", "🚑", "🚒", "🚐", "🛻", "🚚", "🚛", "🚜"]
+
     static private let vehicleEmojis = ["🚗", "🛴", "✈️", "🛵", "⛵️", "🚎", "🚐", "🚛", "🛻", "🏎", "🚂", "🚊", "🚀", "🚁", "🚢", "🛶", "🛥", "🚞", "🚟", "🚃"]
     static private let animalEmojis = ["🐶", "🐱", "🐭", "🐹", "🐰", "🦊", "🐻", "🐼", "🐻‍❄️", "🐨", "🐯", "🦁", "🐮", "🐷", "🐵"]
     static private let foodEmojis = ["🍔", "🥐", "🍕", "🥗", "🥟", "🍣", "🍪", "🍚", "🍝", "🥙", "🍭", "🍤", "🥞", "🍦", "🍛", "🍗"]
@@ -43,6 +43,8 @@ class EmojiMemoryGame: ObservableObject {
             return .red
         }
     }
+    
+    typealias Card = MemoryGame<String>.Card
     
     static func createTheme(_ name: String, _ emojis: [String], _ defaultPairsOfCards: Int) -> Theme {
         let color = colors.randomElement()!
@@ -88,7 +90,7 @@ class EmojiMemoryGame: ObservableObject {
         chosenColor = EmojiMemoryGame.getColor(chosenTheme.cardColor)
     }
     
-    var cards: [MemoryGame<String>.Card] {
+    var cards: [Card] {
         model.cards
     }
     
@@ -97,7 +99,7 @@ class EmojiMemoryGame: ObservableObject {
     }
     // MARK: - Intent(s)
     
-    func choose(_ card: MemoryGame<String>.Card) {
+    func choose(_ card: Card) {
         model.choose(card)
     }
     

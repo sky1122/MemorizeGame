@@ -1,5 +1,5 @@
 //
-//  ContentView.swift
+//  EmojiMemoryGameView.swift
 //  MemorizeGame
 //
 //  Created by JingweiWang on 7/2/23.
@@ -7,21 +7,21 @@
 
 import SwiftUI
 
-struct ContentView: View {
+struct EmojiMemoryGameView: View {
     // then something change, rebuild the entire body.
-    @ObservedObject var viewModel: EmojiMemoryGame
+    @ObservedObject var game: EmojiMemoryGame
     
     var body: some View {
         VStack {
-            Text("score: \(viewModel.score)")
+            Text("score: \(game.score)")
             ScrollView{
                 title
                 LazyVGrid(columns: [GridItem(), GridItem(), GridItem()]) {
-                    ForEach(viewModel.cards) {card in
-                        CardView(card: card)
+                    ForEach(game.cards) {card in
+                        CardView(card)
                             .aspectRatio(2.5/3, contentMode: .fill)
                             .onTapGesture {
-                                viewModel.choose(card)
+                                game.choose(card)
                             }
                             .padding(.all)
                         
@@ -30,16 +30,16 @@ struct ContentView: View {
             }
         }
         .padding(.horizontal)
-        .foregroundColor(viewModel.chosenColor)
+        .foregroundColor(game.chosenColor)
         Button {
-            viewModel.startNewGame()
+            game.startNewGame()
         } label: {
             Text("New Game").font(.largeTitle)
         }
     }
     
     var title: some View {
-        Text("Memorize \(viewModel.chosenTheme.name)!").font(.largeTitle).foregroundColor(.black)
+        Text("Memorize \(game.chosenTheme.name)!").font(.largeTitle).foregroundColor(.black)
     }
 }
 
@@ -48,7 +48,11 @@ struct ContentView: View {
 
 
 struct CardView: View {
-    let card: MemoryGame<String>.Card
+    private let card: MemoryGame<String>.Card
+    
+    init(_ card: EmojiMemoryGame.Card) {
+        self.card = card
+    }
     var body: some View {
         ZStack {
             let shape = RoundedRectangle(cornerRadius: 20)
@@ -70,9 +74,9 @@ struct CardView: View {
 struct ContentView_Previews: PreviewProvider {
     static var previews: some View {
         let game = EmojiMemoryGame()
-//        ContentView(viewModel: game)
+//        EmojiMemoryGameView(viewModel: game)
 //            .preferredColorScheme(.dark)
-        ContentView(viewModel: game)
+        EmojiMemoryGameView(game: game)
             .preferredColorScheme(.light)
     }
 }

@@ -10,7 +10,11 @@ import Foundation
 
 struct MemoryGame<CardContent> where CardContent: Equatable {
     private(set) var cards: [Card]
-    private var IndexOfTheOneAndOnlyFaceUpCard: Int?
+    // make sure only have one faceUpCard
+    private var IndexOfTheOneAndOnlyFaceUpCard: Int? {
+        get { cards.indices.filter({  cards[$0].isFaceUp}).oneAndOnly }
+        set { cards.indices.forEach( { cards[$0].isFaceUp = ($0 == newValue)} )}
+    }
     
     private(set) var score = 0
     
@@ -43,6 +47,7 @@ struct MemoryGame<CardContent> where CardContent: Equatable {
                 cards[chosenIndex].isAlreadySeen = true
                 cards[potentialMatchIndex].isAlreadySeen = true
                 IndexOfTheOneAndOnlyFaceUpCard = nil
+                
             } else {
                 for index in cards.indices {
                     cards[index].isFaceUp = false
@@ -72,7 +77,7 @@ struct MemoryGame<CardContent> where CardContent: Equatable {
         var click:Int = 0
         let content: CardContent
         var chosenTime: Date?
-        var id: Int
+        let id: Int
     }
 }
 
@@ -81,6 +86,16 @@ struct Theme {
     let emojis: [String]
     var numberOfPairsOfCards: Int
     let cardColor: String // type of color?
+}
+
+extension Array {
+    var oneAndOnly: Element? {
+        if count == 1 {
+            return first
+        } else {
+            return nil
+        }
+    }
 }
     
 
