@@ -36,14 +36,17 @@ struct MemoryGame<CardContent> where CardContent: Equatable {
                         score += 2
                     }
                     
-                } else {
+                }
+                else {
+                    if cards[potentialMatchIndex].isAlreadySeen && cards[potentialMatchIndex].click > 0 {
+                        score -= 1
+                    }
                     if cards[chosenIndex].isAlreadySeen && cards[chosenIndex].click > 0 {
                         score -= 1
                     }
                 }
                 cards[chosenIndex].isAlreadySeen = true
                 cards[potentialMatchIndex].isAlreadySeen = true
-                IndexOfTheOneAndOnlyFaceUpCard = nil
                 
             } else {
                 for index in cards.indices {
