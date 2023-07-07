@@ -50,8 +50,6 @@ struct EmojiMemoryGameView: View {
 
 
 
-
-
 struct CardView: View {
     private let card: MemoryGame<String>.Card
     
@@ -61,19 +59,11 @@ struct CardView: View {
     var body: some View {
         GeometryReader(content: { geometry in
             ZStack {
-                let shape = RoundedRectangle(cornerRadius: DrawingConstants.cornerRadius)
-                if card.isFaceUp {
-                    shape.fill().foregroundColor(.white)
-                    shape.strokeBorder(lineWidth: DrawingConstants.lineWidth)
                     Pie(startAngle: Angle(degrees: 0-90), endAngle: Angle(degrees: 110-90))
                     .padding(5).opacity(0.5)
                     Text(card.content).font(font(in: geometry.size))
-                } else if card.isMatched {
-                    shape.opacity(0)
-                } else {
-                    shape.fill()
-                }
             }
+            .cardify(isFaceUp: card.isFaceUp)
         })
     }
     
