@@ -12,6 +12,7 @@ struct EmojiMemoryGameView: View {
     @ObservedObject var game: EmojiMemoryGame
     @State private var dealt = Set<Int>()
     @State private var cardID = UUID()
+    @Namespace private var dealingNamespace
     
     private func deal(_ card: EmojiMemoryGame.Card) {
         dealt.insert(card.id)
@@ -25,22 +26,8 @@ struct EmojiMemoryGameView: View {
         VStack {
             title
             Text("score: \(game.score)")
-            // create a view and let them fit in the screen without scrolldown
-            AspectVGrid(items: game.cards, aspectRatio: 2/3, content: { card in
-                cardView(for: card)
-                .id(cardID)
-            })
-            .onAppear {
-                // "deal" cards
-                withAnimation{
-                    for card in game.cards {
-                        deal(card)
-                    }
-                }
-            }
-            
-            .padding(.horizontal)
-            .foregroundColor(game.chosenColor)
+            gameBody
+            deckBody
             HStack{
                 newGame
                 Spacer()
@@ -49,25 +36,70 @@ struct EmojiMemoryGameView: View {
         }
     }
     
-    var title: some View {
-        Text("Memorize \(game.chosenTheme.name)!").font(.largeTitle).foregroundColor(.black)
+    var gameBody: some View {
+        AspectVGrid(items: game.cards, aspectRatio: CardConstants.aspectRatio, content: { card in
+            cardView(for: card)
+            .transition(AnyTransition.asymmetric(insertion: .opacity, removal: .opacity).animation(.easeInOut(duration: 1)))
+            .id(cardID)
+        })
+        .padding(.horizontal)
+        .foregroundColor(game.chosenColor)
     }
-    var newGame: some View {
-        Button("New Game") {
-            dealt = Set<Int>()
-            cardID = UUID()
-            game.startNewGame()
-            print(game.cards)
+    
+    @ViewBuilder
+    private func cardView(for card: EmojiMemoryGame.Card) -> some View {
+        if isUndeal(card) || (card.isMatched && !card.isFaceUp) {
+            Color.clear
+        } else {
+            CardView(card)
+                .matchedGeometryEffect(id: card.id, in: dealingNamespace)
+                .padding(4)
+                .transition(AnyTransition.asymmetric(insertion: .identity, removal: .opacity).animation(.easeInOut(duration: 1)))
+                .onTapGesture {
+                    withAnimation(.easeInOut(duration: 0.5)){
+                        game.choose(card)
+                    }
+            }
+        }
+    }
+    
+    private struct CardConstants {
+        static let aspectRatio: CGFloat = 2/3
+        static let undealHeight: CGFloat = 90
+        static let undealWidth: CGFloat = undealHeight * aspectRatio
+    }
+    
+    var deckBody: some View {
+        ZStack {
+            ForEach(game.cards.filter(isUndeal)) { card in
+                CardView(card)
+                    .matchedGeometryEffect(id: card.id, in: dealingNamespace)
+                    .transition(AnyTransition.asymmetric(insertion: .opacity, removal: .identity))
+            }
+        }
+        .frame(width: CardConstants.undealWidth, height: CardConstants.undealHeight)
+        .foregroundColor(game.chosenColor)
+        .onTapGesture {
             withAnimation{
                 for card in game.cards {
                     deal(card)
                 }
             }
+        }
+    }
+    
+    var title: some View {
+        Text("Memorize \(game.chosenTheme.name)!").font(.largeTitle).foregroundColor(.black)
+    }
+    
+    var newGame: some View {
+        Button("New Game") {
+            dealt = Set<Int>()
+            cardID = UUID()
             
         }.font(.largeTitle).foregroundColor(.gray).padding(10)
     }
 
-    
     var shuffle: some View {
         Button("Shuffle") {
             // use implecte anamation for intent functions
@@ -77,23 +109,11 @@ struct EmojiMemoryGameView: View {
         }.font(.largeTitle).padding(10)
     }
     
-    @ViewBuilder
-    private func cardView(for card: EmojiMemoryGame.Card) -> some View {
-        if isUndeal(card) || (card.isMatched && !card.isFaceUp) {
-            Color.clear
-        } else {
-            CardView(card)
-                .padding(4)
-                .transition(AnyTransition.asymmetric(insertion: .scale, removal: .opacity).animation(.easeInOut(duration: 1)))
-                .onTapGesture {
-                    withAnimation(.easeInOut(duration: 1)){
-                        game.choose(card)
-                    }
-                }
-                
-        }
-    }
 }
+
+
+
+
 
 
 
@@ -130,8 +150,6 @@ struct CardView: View {
         static let fontSize: CGFloat = 32
     }
 }
-
-
 
 struct ContentView_Previews: PreviewProvider {
     static var previews: some View {
