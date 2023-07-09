@@ -33,12 +33,12 @@ struct Cardify: AnimatableModifier {
             content
                 .opacity(rotation < 90 ? 1 : 0)
         }
-        .rotation3DEffect(Angle.degrees(rotation), axis: (x: 0, y: 1, z: 0))
+        .rotation3DEffect(Angle.degrees(rotation), axis: (x: 0, y: 0.5, z: 0))
     }
     
     
     private struct DrawingConstants {
-        static let cornerRadius: CGFloat = 15
+        static let cornerRadius: CGFloat = 5
         static let lineWidth: CGFloat = 3
     }
 }

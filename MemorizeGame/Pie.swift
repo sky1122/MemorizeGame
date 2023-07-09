@@ -8,11 +8,20 @@
 import SwiftUI
 
 struct Pie: Shape {
-    // animated startAngle and endAngle
+//     animated startAngle and endAngle
     var startAngle: Angle
     var endAngle: Angle
-    // let can only get value once, and for this I want people to set the clockwise value when I init it.
     var clockwise: Bool = false
+    
+    var animatableData: AnimatablePair<Double, Double> {
+        get {
+            AnimatablePair(startAngle.radians, endAngle.radians)
+        }
+        set {
+            startAngle = Angle.radians(newValue.first)
+            endAngle = Angle.radians(newValue.second)
+        }
+    }
     
     func path(in rect: CGRect) -> Path {
         // draw things in the shape
