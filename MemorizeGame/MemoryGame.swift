@@ -23,7 +23,6 @@ struct MemoryGame<CardContent> where CardContent: Equatable {
            !cards[chosenIndex].isFaceUp,
            !cards[chosenIndex].isMatched
         {
-            let chosenTime = Date()
             if let potentialMatchIndex = IndexOfTheOneAndOnlyFaceUpCard {
                 
                 if cards[chosenIndex].content == cards[potentialMatchIndex].content
@@ -52,12 +51,15 @@ struct MemoryGame<CardContent> where CardContent: Equatable {
                 for index in cards.indices {
                     cards[index].isFaceUp = false
                 }
-                cards[chosenIndex].chosenTime = chosenTime
+                
                 IndexOfTheOneAndOnlyFaceUpCard = chosenIndex
             }
             cards[chosenIndex].isFaceUp = true
             cards[chosenIndex].click += 1
         }
+    }
+    mutating func shuffle() {
+        cards.shuffle()
     }
     
     init(numberOfPairsOfCards: Int, createCardContent: (Int) -> CardContent) {
@@ -76,7 +78,6 @@ struct MemoryGame<CardContent> where CardContent: Equatable {
         var isAlreadySeen = false
         var click:Int = 0
         let content: CardContent
-        var chosenTime: Date?
         let id: Int
     }
 }

@@ -108,4 +108,9 @@ class EmojiMemoryGame: ObservableObject {
         chosenColor = EmojiMemoryGame.getColor(chosenTheme.cardColor)
         model = EmojiMemoryGame.createMemoryGame(of: chosenTheme )
     }
+    
+    func shuffle() {
+        model.shuffle()
+    }
+    
 }

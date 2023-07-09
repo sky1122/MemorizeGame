@@ -10,6 +10,16 @@ import SwiftUI
 struct EmojiMemoryGameView: View {
     // then something change, rebuild the entire body.
     @ObservedObject var game: EmojiMemoryGame
+    @State private var dealt = Set<Int>()
+    @State private var cardID = UUID()
+    
+    private func deal(_ card: EmojiMemoryGame.Card) {
+        dealt.insert(card.id)
+    }
+    
+    private func isUndeal(_ card: EmojiMemoryGame.Card) -> Bool {
+        !dealt.contains(card.id)
+    }
     
     var body: some View {
         VStack {
@@ -18,14 +28,23 @@ struct EmojiMemoryGameView: View {
             // create a view and let them fit in the screen without scrolldown
             AspectVGrid(items: game.cards, aspectRatio: 2/3, content: { card in
                 cardView(for: card)
+                .id(cardID)
             })
+            .onAppear {
+                // "deal" cards
+                withAnimation{
+                    for card in game.cards {
+                        deal(card)
+                    }
+                }
+            }
             
             .padding(.horizontal)
             .foregroundColor(game.chosenColor)
-            Button {
-                game.startNewGame()
-            } label: {
-                Text("New Game").font(.largeTitle)
+            HStack{
+                newGame
+                Spacer()
+                shuffle
             }
         }
     }
@@ -33,17 +52,45 @@ struct EmojiMemoryGameView: View {
     var title: some View {
         Text("Memorize \(game.chosenTheme.name)!").font(.largeTitle).foregroundColor(.black)
     }
+    var newGame: some View {
+        Button("New Game") {
+            dealt = Set<Int>()
+            cardID = UUID()
+            game.startNewGame()
+            print(game.cards)
+            withAnimation{
+                for card in game.cards {
+                    deal(card)
+                }
+            }
+            
+        }.font(.largeTitle).foregroundColor(.gray).padding(10)
+    }
+
+    
+    var shuffle: some View {
+        Button("Shuffle") {
+            // use implecte anamation for intent functions
+            withAnimation{
+                game.shuffle()
+            }
+        }.font(.largeTitle).padding(10)
+    }
     
     @ViewBuilder
     private func cardView(for card: EmojiMemoryGame.Card) -> some View {
-        if card.isMatched && !card.isFaceUp {
-            Rectangle().opacity(0)
+        if isUndeal(card) || (card.isMatched && !card.isFaceUp) {
+            Color.clear
         } else {
             CardView(card)
                 .padding(4)
+                .transition(AnyTransition.asymmetric(insertion: .scale, removal: .opacity).animation(.easeInOut(duration: 1)))
                 .onTapGesture {
-                    game.choose(card)
+                    withAnimation(.easeInOut(duration: 1)){
+                        game.choose(card)
+                    }
                 }
+                
         }
     }
 }
@@ -57,24 +104,30 @@ struct CardView: View {
         self.card = card
     }
     var body: some View {
+        
         GeometryReader(content: { geometry in
             ZStack {
-                    Pie(startAngle: Angle(degrees: 0-90), endAngle: Angle(degrees: 110-90))
+                Pie(startAngle: Angle(degrees: 0-90), endAngle: Angle(degrees: 110-90))
                     .padding(5).opacity(0.5)
-                    Text(card.content).font(font(in: geometry.size))
+                
+                Text(card.content)
+                    .rotationEffect(Angle.degrees(card.isMatched ? 360 : 0))
+                    .animation(.linear(duration: 1).repeatForever(autoreverses: false))
+                    .font(Font.system(size: DrawingConstants.fontSize))
+                    .scaleEffect(scale(thatFits: geometry.size))
             }
             .cardify(isFaceUp: card.isFaceUp)
+//            .id(UUID())
         })
     }
     
-    private func font(in size:CGSize) -> Font {
-        Font.system(size:min(size.width, size.height) * DrawingConstants.fontScale)
+    private func scale(thatFits size: CGSize) -> CGFloat {
+        min(size.width, size.height) / (DrawingConstants.fontSize / DrawingConstants.fontScale)
     }
     
     private struct DrawingConstants {
-        static let cornerRadius: CGFloat = 15
-        static let lineWidth: CGFloat = 3
         static let fontScale: CGFloat = 0.6
+        static let fontSize: CGFloat = 32
     }
 }
 
