@@ -13,6 +13,7 @@ struct EmojiMemoryGameView: View {
     @State private var dealt = Set<Int>()
     @State private var cardID = UUID()
     @Namespace private var dealingNamespace
+
     
     private func deal(_ card: EmojiMemoryGame.Card) {
         dealt.insert(card.id)
@@ -59,6 +60,7 @@ struct EmojiMemoryGameView: View {
                     .matchedGeometryEffect(id: card.id, in: dealingNamespace)
                     .padding(4)
                     .transition(AnyTransition.asymmetric(insertion: .identity, removal: .scale))
+                                    .rotationEffect(Angle.degrees(card.isMatched ? 360 : 0))
                     .zIndex(zIndex(of: card))
                     .onTapGesture {
                         withAnimation {
@@ -105,9 +107,14 @@ struct EmojiMemoryGameView: View {
     }
     
     var newGame: some View {
+        
         Button("New Game") {
-            dealt = []
-            game.startNewGame()
+            UIView.performWithoutAnimation {
+//                isAnimating = false
+                dealt = []
+                game.startNewGame()
+            }
+
         }.font(.largeTitle).foregroundColor(.gray).padding(10)
     }
 
@@ -130,6 +137,7 @@ struct EmojiMemoryGameView: View {
 struct CardView: View {
     private let card: MemoryGame<String>.Card
     @State private var animatedBonusRemaining: Double = 0
+    @State private var isAnimating = false
     
     init(_ card: EmojiMemoryGame.Card) {
         self.card = card
@@ -154,7 +162,7 @@ struct CardView: View {
                     .padding(5)
                     .opacity(0.5)
                 Text(card.content)
-                    .rotationEffect(Angle.degrees(card.isMatched ? 360 : 0))
+//                    .rotationEffect(Angle.degrees(card.isMatched ? 360 : 0))
                     .animation(Animation.linear(duration: 1).repeatForever(autoreverses: false))
                     .padding(5)
                     .font(Font.system(size: DrawingConstants.fontSize))
