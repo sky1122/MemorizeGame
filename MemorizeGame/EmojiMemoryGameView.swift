@@ -10,10 +10,9 @@ import SwiftUI
 struct EmojiMemoryGameView: View {
     // then something change, rebuild the entire body.
     @ObservedObject var game: EmojiMemoryGame
-    @State private var dealt = Set<Int>()
-    @State private var cardID = UUID()
+    @State private var dealt = Set<UUID>()
+    @State private var themeID = UUID()
     @Namespace private var dealingNamespace
-
     
     private func deal(_ card: EmojiMemoryGame.Card) {
         dealt.insert(card.id)
@@ -41,6 +40,7 @@ struct EmojiMemoryGameView: View {
                 title
                 Text("score: \(game.score)")
                 gameBody
+                
                 HStack{
                     newGame
                     Spacer()
@@ -60,7 +60,7 @@ struct EmojiMemoryGameView: View {
                     .matchedGeometryEffect(id: card.id, in: dealingNamespace)
                     .padding(4)
                     .transition(AnyTransition.asymmetric(insertion: .identity, removal: .scale))
-                                    .rotationEffect(Angle.degrees(card.isMatched ? 360 : 0))
+//                                    .rotationEffect(Angle.degrees(card.isMatched ? 360 : 0))
                     .zIndex(zIndex(of: card))
                     .onTapGesture {
                         withAnimation {
@@ -83,12 +83,14 @@ struct EmojiMemoryGameView: View {
     
     var deckBody: some View {
         ZStack {
+            
             ForEach(game.cards.filter(isUndealt)) { card in
+                
                 CardView(card)
                     .matchedGeometryEffect(id: card.id, in: dealingNamespace)
                     .transition(AnyTransition.asymmetric(insertion: .opacity, removal: .identity))
                     .zIndex(zIndex(of: card))
-                    .id(cardID)
+                    .id(themeID)
             }
         }
         .frame(width: CardConstants.undealWidth, height: CardConstants.undealHeight)
@@ -111,6 +113,7 @@ struct EmojiMemoryGameView: View {
         Button("New Game") {
             UIView.performWithoutAnimation {
 //                isAnimating = false
+                
                 dealt = []
                 game.startNewGame()
             }
@@ -162,7 +165,7 @@ struct CardView: View {
                     .padding(5)
                     .opacity(0.5)
                 Text(card.content)
-//                    .rotationEffect(Angle.degrees(card.isMatched ? 360 : 0))
+                    .rotationEffect(Angle.degrees(card.isMatched ? 360 : 0))
                     .animation(Animation.linear(duration: 1).repeatForever(autoreverses: false))
                     .padding(5)
                     .font(Font.system(size: DrawingConstants.fontSize))

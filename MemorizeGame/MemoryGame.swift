@@ -66,8 +66,10 @@ struct MemoryGame<CardContent> where CardContent: Equatable {
         cards = []
         for pairIndex in 0..<numberOfPairsOfCards {
             let content = createCardContent(pairIndex)
-            cards.append(Card(content: content, id: pairIndex * 2))
-            cards.append(Card(content: content, id: pairIndex * 2 + 1))
+//            cards.append(Card(content: content, id: pairIndex * 2))
+//            cards.append(Card(content: content, id: pairIndex * 2 + 1))
+            cards.append(Card(content: content, id: UUID()))
+            cards.append(Card(content: content, id: UUID()))
         }
         cards.shuffle()
     }
@@ -98,7 +100,7 @@ struct MemoryGame<CardContent> where CardContent: Equatable {
             }
         }
         let content: CardContent
-        let id: Int
+        let id: UUID
             
             // MARK: - Bonus Time
             
